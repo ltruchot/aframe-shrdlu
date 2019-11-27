@@ -1,3 +1,8 @@
+# Aframe SHRDLU
+
+Play with aframe in a SHRDLU inspired way
+
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
