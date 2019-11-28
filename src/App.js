@@ -1,36 +1,27 @@
 // npm
 import React, { useState } from 'react';
-import 'aframe';
 import {
-  pluck, range, map, pipe, prop, reduce, concat, find, includes, head,
+  pluck, map, pipe, prop, reduce, concat, find, includes, head,
 } from 'ramda';
+
+import './aframe-extension';
 
 // styles
 import './App.css';
 
+// helpers
+
+import { createAframeElements } from './helpers/aframe';
 // data
 import { x11Colors } from './data/colors';
 import { textNumbers } from './data/numbers';
 import { afShapes } from './data/shapes';
 
+
 function App() {
   const [scene, setScene] = useState([]);
   const [lastPos, setLastPos] = useState([0, 0, -5]);
 
-  const createAframeElements = (number, color, afShape) => {
-    const newItems = range(0, number)
-      .map((el, i) => {
-        const [x, y, z] = lastPos;
-        return {
-          Shape: `a-${afShape.tag}`,
-          ...afShape.defaultAttrs,
-          color,
-          position: [x, y + i, z].join(' '),
-        };
-      });
-    setScene((items) => [...items, ...newItems]);
-    setLastPos(([x, y, z]) => [x, y + newItems.length, z]);
-  };
   const findShapeByName = (name) => find((el) => includes(name, prop('names', el)), afShapes);
 
   const handleKeyPress = (event) => {
@@ -56,11 +47,13 @@ function App() {
         return console.log(`Unknown shape. Choose between ${map(pipe(prop('names'), head), afShapes).join(', ')}.`);
       }
       const afShape = findShapeByName(shape);
-      console.log(afShape);
+
       // choose command and output
       switch (command) {
         case 'create': {
-          createAframeElements(n, color, afShape);
+          const newItems = createAframeElements(n, color, afShape, lastPos);
+          setScene((items) => [...items, ...newItems]);
+          setLastPos(([x, y, z]) => [x, y + newItems.length, z]);
           event.target.value = '';
           break;
         }
@@ -77,8 +70,6 @@ function App() {
           <label htmlFor="command">Write anything like &quot;create a blue box&quot;. Then press [Enter].</label>
           <br />
           <input id="command" onKeyPress={handleKeyPress} />
-          <button onClick={() => createAframeElements(1, 'blue', findShapeByName('box'))}>blue box</button>
-          <button onClick={() => createAframeElements(1, 'yellow', findShapeByName('pyramid'))}>yellow pyramid</button>
         </div>
         <div className="w-50">
           <a-scene
@@ -100,7 +91,7 @@ function App() {
             ))}
             <a-plane position="0 -0.5 -5" rotation="-90 0 0" width="7" height="7" color="#7BC8A4" />
             <a-sky color="#ECECEC" />
-            <a-entity camera wasd-controls acceleration="100" look-controls position="0 1 0">
+            <a-entity camera wasd-controls acceleration="100" look-controls position="-5 1 -1" rotation="-25 -50 0">
               <a-camera id="camera" />
             </a-entity>
           </a-scene>
