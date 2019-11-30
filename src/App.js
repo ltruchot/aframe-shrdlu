@@ -1,7 +1,7 @@
 // npm
 import React, { useState, useEffect } from 'react';
 import {
-  pluck, map, pipe, prop, reduce, concat, find, includes, head, inc, uniq,
+  pluck, map, pipe, prop, find, includes, head, inc, uniq,
 } from 'ramda';
 import { sanitize } from 'dompurify';
 
@@ -16,7 +16,7 @@ import { createAframeElements } from './helpers/aframe';
 // data
 import { x11Colors } from './data/colors';
 import { textNumbers } from './data/numbers';
-import { afShapes } from './data/shapes';
+import { afShapes, shapes, getShapeNames } from './data/shapes';
 import { understandMove } from './helpers/shrdlu';
 import { alterByIndex } from './helpers/ramda';
 
@@ -38,7 +38,7 @@ function App() {
     if (terminalRef && terminalRef.current) {
       terminalRef.current.scrollTo(0, terminalRef.current.scrollHeight);
     }
-  }, [terminalLines]);
+  }, [terminalLines, terminalRef]);
 
   const printCommand = (command, response) => {
     setTerminalLines((oldCommands) => [
@@ -47,18 +47,22 @@ function App() {
       { text: response, type: 'shrdlu' },
     ]);
   };
-  const findShapeByName = (name) => find((el) => includes(name, prop('names', el)), afShapes);
+  const findShapeByName = (name) => find((el) => includes(name, getShapeNames(el)), afShapes);
 
   const handleKeyPress = (event) => {
     if (event.key === 'Enter') {
       // vars
       const colors = pluck('web', x11Colors);
-      const shapes = reduce((acc, cur) => concat(prop('names', cur), acc), [], afShapes);
 
       // input
       const iptEl = event.target;
       const iptValue = sanitize(iptEl.value, { ALLOWED_TAGS: [] }); // sanitize
+      if (!iptValue) {
+        return printCommand('', 'Did you said something ?');
+      }
       const [command, ...args] = iptValue.split(' ');
+
+      const getErrorWithList = (val, type, list) => `Unknown "<span>${val}</span>" ${type}. Choose between <span>${list.join(', ')}</span>.`;
 
       // choose command and output
       switch (command) {
@@ -69,18 +73,24 @@ function App() {
 
           // check and format number
           if (!textNumbers[number] && Number.isNaN(+number)) {
-            return printCommand(iptValue, `Unknown number. Choose between <span>${uniq(Object.values(textNumbers)).join(', ')}</span>.`);
+            printCommand(iptValue, getErrorWithList(number, 'number', uniq(Object.values(textNumbers))));
+            iptEl.value = '';
+            return;
           }
           const n = Number.isNaN(+number) ? textNumbers[number] : +number;
 
           // check color
           if (!includes(color, colors)) {
-            return printCommand(iptValue, `Unknown "<span>${color}</span>" color. Choose between <span>${colors.join(', ')}.</span>`);
+            printCommand(iptValue, getErrorWithList(color, 'color', colors));
+            iptEl.value = '';
+            return;
           }
 
           // check shape
           if (!includes(shape, shapes)) {
-            return printCommand(iptValue, `Unknown shape. Choose between <span>${map(pipe(prop('names'), head), afShapes).join(', ')}.</span>`);
+            printCommand(iptValue, getErrorWithList(shape, 'shape', map(pipe(prop('names'), head), afShapes)));
+            iptEl.value = '';
+            return;
           }
           const afShape = findShapeByName(shape);
 
@@ -93,8 +103,12 @@ function App() {
           break;
         }
         case 'move': {
-          const { things, where } = understandMove(args, scene);
-          console.log(things, where);
+          const { things, where, error } = understandMove(args, scene);
+          if (error) {
+            printCommand(iptValue, error);
+            iptEl.value = '';
+            return;
+          }
           setScene((elements) => elements.map((el) => (things.includes(el) ? { ...el, position: [...alterByIndex(inc, 2, el.position)] } : el)));
           printCommand(iptValue, 'Done.');
           iptEl.value = '';

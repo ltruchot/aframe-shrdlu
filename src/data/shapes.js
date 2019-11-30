@@ -1,6 +1,10 @@
+import {
+  map, pipe, flatten, props,
+} from 'ramda';
+
 export const afShapes = [
   {
-    names: ['box', 'cube'],
+    singulars: ['box', 'cube'],
     plurals: ['boxes', 'cubes'],
     tag: 'box',
     defaultAttrs: {
@@ -10,7 +14,7 @@ export const afShapes = [
     },
   },
   {
-    names: ['cone'],
+    singulars: ['cone'],
     plurals: ['cones'],
     tag: 'cone',
     defaultAttrs: {
@@ -20,7 +24,7 @@ export const afShapes = [
     },
   },
   {
-    names: ['pyramid'],
+    singulars: ['pyramid'],
     plurals: ['pyramids'],
     tag: 'cone',
     defaultAttrs: {
@@ -32,7 +36,7 @@ export const afShapes = [
     },
   },
   {
-    names: ['cylinder'],
+    singulars: ['cylinder'],
     plurals: ['cylinders'],
     tag: 'cylinder',
     defaultAttrs: {
@@ -41,7 +45,7 @@ export const afShapes = [
     },
   },
   {
-    names: ['sphere', 'ball'],
+    singulars: ['sphere', 'ball'],
     plurals: ['spheres', 'balls'],
     tag: 'sphere',
     defaultAttrs: {
@@ -49,3 +53,11 @@ export const afShapes = [
     },
   },
 ];
+
+
+export const getShapeNames = pipe(props(['singulars', 'plurals']), flatten);
+
+export const shapes = pipe(
+  map(getShapeNames),
+  flatten,
+)(afShapes);
