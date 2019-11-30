@@ -1,6 +1,7 @@
 export const afShapes = [
   {
-    names: ['box', 'boxes', 'cube', 'cubes'],
+    names: ['box', 'cube'],
+    plurals: ['boxes', 'cubes'],
     tag: 'box',
     defaultAttrs: {
       width: 1,
@@ -9,7 +10,8 @@ export const afShapes = [
     },
   },
   {
-    names: ['cone', 'cones'],
+    names: ['cone'],
+    plurals: ['cones'],
     tag: 'cone',
     defaultAttrs: {
       height: 1,
@@ -18,7 +20,8 @@ export const afShapes = [
     },
   },
   {
-    names: ['pyramid', 'pyramids'],
+    names: ['pyramid'],
+    plurals: ['pyramids'],
     tag: 'cone',
     defaultAttrs: {
       height: 1,
@@ -29,7 +32,8 @@ export const afShapes = [
     },
   },
   {
-    names: ['cylinder', 'cylinders'],
+    names: ['cylinder'],
+    plurals: ['cylinders'],
     tag: 'cylinder',
     defaultAttrs: {
       radius: 0.5,
@@ -37,7 +41,8 @@ export const afShapes = [
     },
   },
   {
-    names: ['sphere', 'spheres', 'ball', 'balls'],
+    names: ['sphere', 'ball'],
+    plurals: ['spheres', 'balls'],
     tag: 'sphere',
     defaultAttrs: {
       radius: 0.5,

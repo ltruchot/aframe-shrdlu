@@ -5,25 +5,28 @@ body, html {
   padding: 0;
   margin: 0;
   font-size: 18px;
+  height: 100vh;
 }
 
 .main-container {
   display: flex;
-  height: 800px;
+  height: 100vh;
+  overflow: hidden;
 }
-.w-50 {
-  width: 50%;
-}
+
 a-scene {
-  width: 100%;
-  height: 100%;
+  width: 100% !important;
+  height: 100vh !important; 
 }
 
 .terminal {
+  width: 100% !important;
   background-color: black;
   color: white;
   font-family: 'Courier New', Courier, monospace;
   padding: 10px;
+  height: 100vh;
+  overflow-y: auto;
 }
 .terminal input {
   margin-top: 15px;
@@ -31,8 +34,24 @@ a-scene {
   width: 100%;
   border: 0;
   background-color: black;
-  color: white;
+  color: #00FF41;
   outline: none;
   height: 20px;
   font-size: 1rem;
+}
+.terminal p.shrdlu {
+  text-transform: uppercase;
+}
+.terminal p.shrdlu::before {
+  content: "*** ";
+}
+.terminal p.shrdlu::after {
+  content: " ***";
+}
+.terminal p.shrdlu span {
+  text-transform: none;
+  color: lightblue;
+}
+.terminal p.human {
+  color: #00FF41;
 }
