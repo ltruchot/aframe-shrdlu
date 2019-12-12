@@ -1,35 +1,35 @@
 // npm
 import React, { useState, useEffect } from 'react';
 import {
-  pluck, map, pipe, prop, find, includes, head, inc, uniq,
+  pluck, map, pipe, prop, includes, head, inc, uniq,
 } from 'ramda';
 import { sanitize } from 'dompurify';
 
-import './aframe-extension';
+import './business/aframe.directives';
 
 // styles
 import './App.css';
 
 // helpers
 
-import { createAframeElements } from './helpers/aframe';
+import { createAframeElements } from './business/aframe.helpers';
 // data
-import { x11Colors } from './data/colors';
-import { textNumbers } from './data/numbers';
-import { afShapes, shapes, getShapeNames } from './data/shapes';
-import { understandMove } from './helpers/shrdlu';
-import { alterByIndex } from './helpers/ramda';
+import { x11Colors } from './domain/colors';
+import { textNumbers } from './domain/numbers';
+import { afShapes, shapes, findShapeByName } from './domain/shapes';
+import { understandMove } from './business/shrdlu';
+import { alterByIndex } from './core/array';
+import { introduction } from './business/data/terminal';
+import { understandCommand } from './business/shrdlu/understand';
 
 
 function App() {
+  understandCommand('create a blue box');
   // states
   const [autoid, setAutoid] = useState(0);
   const [scene, setScene] = useState([]);
   const [lastPos, setLastPos] = useState([0, 0, -5]);
-  const [terminalLines, setTerminalLines] = useState([
-    { text: 'Hi human.', type: 'shrdlu' },
-    { text: 'Write anything like "<span>create a blue box</span>". Then press [Enter].', type: 'shrdlu' },
-  ]);
+  const [terminalLines, setTerminalLines] = useState(introduction);
 
   const terminalRef = React.createRef();
 
@@ -47,7 +47,7 @@ function App() {
       { text: response, type: 'shrdlu' },
     ]);
   };
-  const findShapeByName = (name) => find((el) => includes(name, getShapeNames(el)), afShapes);
+
 
   const handleKeyPress = (event) => {
     if (event.key === 'Enter') {

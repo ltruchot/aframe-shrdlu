@@ -1,5 +1,5 @@
 import { range } from 'ramda';
-import { getShapeNames } from '../data/shapes';
+import { getShapeNames } from '../domain/shapes';
 
 export const createAframeElements = (number, color, afShape, [x, y, z], autoid) => range(0, number)
   .map((n) => ({

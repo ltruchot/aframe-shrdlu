@@ -4,9 +4,9 @@ import {
 } from 'ramda';
 
 // data
-import { x11Colors } from '../data/colors';
-import { shapes, getShapeNames } from '../data/shapes';
-import { demonstrativePronouns } from '../data/pronouns';
+import { x11Colors } from '../domain/colors';
+import { shapes, getShapeNames } from '../domain/shapes';
+import { demonstrativePronouns } from '../domain/pronouns';
 
 const colors = pluck('web', x11Colors);
 

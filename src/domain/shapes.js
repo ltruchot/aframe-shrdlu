@@ -1,5 +1,5 @@
 import {
-  map, pipe, flatten, props,
+  map, pipe, flatten, props, find, includes,
 } from 'ramda';
 
 export const afShapes = [
@@ -56,6 +56,7 @@ export const afShapes = [
 
 
 export const getShapeNames = pipe(props(['singulars', 'plurals']), flatten);
+export const findShapeByName = (name) => find((el) => includes(name, getShapeNames(el)), afShapes);
 
 export const shapes = pipe(
   map(getShapeNames),
