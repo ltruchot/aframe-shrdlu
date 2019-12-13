@@ -1,3 +1,4 @@
+/*
 // npm
 import {
   pluck, includes, last, take, head, drop, tail, pipe,
@@ -9,6 +10,7 @@ import { shapes, getShapeNames } from '../domain/shapes';
 import { demonstrativePronouns } from '../domain/pronouns';
 
 const colors = pluck('web', x11Colors);
+const demonstrativePronouns = ['this', 'the', 'that', 'those'];
 
 const checkColoredThing = ([article, color, shape], scene) => (includes(article, demonstrativePronouns)
   && includes(color, colors)
@@ -76,3 +78,4 @@ export const understandMove = (words, sceneEls) => {
     error,
   };
 };
+*/

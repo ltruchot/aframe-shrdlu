@@ -1,8 +1,5 @@
 // npm
 import React, { useState, useEffect } from 'react';
-import {
-  pluck, map, pipe, prop, includes, head, inc, uniq,
-} from 'ramda';
 import { sanitize } from 'dompurify';
 
 import './business/aframe.directives';
@@ -11,20 +8,16 @@ import './business/aframe.directives';
 import './App.css';
 
 // helpers
-
 import { createAframeElements } from './business/aframe.helpers';
+
 // data
-import { x11Colors } from './domain/colors';
 import { textNumbers } from './domain/numbers';
-import { afShapes, shapes, findShapeByName } from './domain/shapes';
-import { understandMove } from './business/shrdlu';
-import { alterByIndex } from './core/array';
 import { introduction } from './business/data/terminal';
 import { understandCommand } from './business/shrdlu/understand';
+import { findShapeByName } from './domain/shapes';
 
 
 function App() {
-  understandCommand('create a blue box');
   // states
   const [autoid, setAutoid] = useState(0);
   const [scene, setScene] = useState([]);
@@ -48,23 +41,32 @@ function App() {
     ]);
   };
 
+  const displayError = (command, err) => {
+    const errors = [
+      'What did you said ?',
+      `Sorry but I didn't understand what is "<span>${err.original}</span>".`,
+      `I can't do this "<span>${err.original}</span>" action`,
+    ];
+    printCommand(command, errors[err.code] || "An error that I can't expain just happened");
+  };
+
 
   const handleKeyPress = (event) => {
     if (event.key === 'Enter') {
       // vars
-      const colors = pluck('web', x11Colors);
+      //
 
       // input
       const iptEl = event.target;
-      const iptValue = sanitize(iptEl.value, { ALLOWED_TAGS: [] }); // sanitize
-      if (!iptValue) {
-        return printCommand('', 'Did you said something ?');
+      const command = sanitize(iptEl.value, { ALLOWED_TAGS: [] }); // sanitize
+      if (!command) {
+        return displayError('', { code: 0, msg: 'empty', original: '' });
       }
-      const [command, ...args] = iptValue.split(' ');
 
-      const getErrorWithList = (val, type, list) => `Unknown "<span>${val}</span>" ${type}. Choose between <span>${list.join(', ')}</span>.`;
+      // const getErrorWithList = (val, type, list) => `Unknown "<span>${val}</span>" ${type}. Choose between <span>${list.join(', ')}</span>.`;
 
       // choose command and output
+      /*
       switch (command) {
         case 'draw':
         case 'create': {
@@ -121,7 +123,29 @@ function App() {
       }
     }
   };
+ */
+      console.log(understandCommand(command));
+      const [err, {
+        understood: {
+          number, color, shape,
+        },
+      }] = understandCommand(command);
 
+      if (err) {
+        return displayError(command, err);
+      }
+
+      const afShape = findShapeByName(shape);
+      const fNumber = textNumbers[number] || parseInt(number, 10);
+
+      const newItems = createAframeElements(fNumber, color, afShape, lastPos, autoid);
+      setAutoid((id) => id + newItems.length);
+      setScene((items) => [...items, ...newItems]);
+      setLastPos(([x, y, z]) => [x, y + newItems.length, z]);
+      printCommand(command, 'Done.');
+      iptEl.value = '';
+    }
+  };
   const focusInput = (e) => {
     const ipt = e && e.target && e.target.querySelector('input');
     if (ipt && ipt.focus) {
@@ -149,7 +173,7 @@ function App() {
           }) => <Shape position={position.join(' ')} {...attrs} key={id} />)}
           <a-plane position="0 -0.5 -5" rotation="-90 0 0" width="7" height="7" color="#7BC8A4" />
           <a-sky color="#ECECEC" />
-          <a-entity camera wasd-controls acceleration="100" look-controls position="-5 2 -1" rotation="-25 -50 0">
+          <a-entity camera wasd-controls acceleration="100" look-controls position="-5 1 0" rotation="0 -45 0">
             <a-camera id="camera" />
           </a-entity>
         </a-scene>
