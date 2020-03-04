@@ -1,20 +1,19 @@
 // npm
 import React, { useState, useEffect } from 'react';
-import { sanitize } from 'dompurify';
 
 import './business/aframe.directives';
 
-// styles
-import './App.css';
 
 // helpers
+import { process } from 'scoped-natural-language-processor';
+import { pipe, find, prop } from 'ramda';
 import { createAframeElements } from './business/aframe.helpers';
 
 // data
 import { textNumbers } from './domain/numbers';
 import { introduction } from './business/data/terminal';
-import { understandCommand } from './business/shrdlu/understand';
 import { findShapeByName } from './domain/shapes';
+import { concepts } from './business/data/concepts';
 
 
 function App() {
@@ -44,106 +43,48 @@ function App() {
   const displayError = (command, err) => {
     const errors = [
       'What did you said ?',
-      `Sorry but I didn't understand what is "<span>${err.original}</span>".`,
-      `I can't do this "<span>${err.original}</span>" action`,
+      `Sorry but I didn't understand what is "<span>${err.input}</span>".`,
+      `I can't do this "<span>${err.input}</span>" action`,
     ];
-    printCommand(command, errors[err.code] || "An error that I can't expain just happened");
+    printCommand(command, errors[err.code] || "An error that I can't explain just happened");
   };
 
 
   const handleKeyPress = (event) => {
     if (event.key === 'Enter') {
-      // vars
-      //
-
       // input
       const iptEl = event.target;
-      const command = sanitize(iptEl.value, { ALLOWED_TAGS: [] }); // sanitize
-      if (!command) {
-        return displayError('', { code: 0, msg: 'empty', original: '' });
+      const command = iptEl.value;
+      const [err, res] = process(concepts, command);
+      if (err) {
+        console.error(err);
+        return displayError('', err.errors[0]);
       }
-
-      // const getErrorWithList = (val, type, list) => `Unknown "<span>${val}</span>" ${type}. Choose between <span>${list.join(', ')}</span>.`;
-
-      // choose command and output
-      /*
-      switch (command) {
-        case 'draw':
+      const [verb, thing] = res.understood;
+      console.log(verb, thing);
+      switch (verb.value) {
         case 'create': {
-          // input
-          const [number, color, shape] = args;
-
-          // check and format number
-          if (!textNumbers[number] && Number.isNaN(+number)) {
-            printCommand(iptValue, getErrorWithList(number, 'number', uniq(Object.values(textNumbers))));
-            iptEl.value = '';
-            return;
-          }
-          const n = Number.isNaN(+number) ? textNumbers[number] : +number;
-
-          // check color
-          if (!includes(color, colors)) {
-            printCommand(iptValue, getErrorWithList(color, 'color', colors));
-            iptEl.value = '';
-            return;
-          }
-
-          // check shape
-          if (!includes(shape, shapes)) {
-            printCommand(iptValue, getErrorWithList(shape, 'shape', map(pipe(prop('names'), head), afShapes)));
-            iptEl.value = '';
-            return;
-          }
+          const extractValue = (c) => pipe(
+            find((val) => val.concept === c),
+            prop('value'),
+          );
+          const shape = extractValue('shape')(thing.value);
+          const number = extractValue('number')(thing.value);
+          const color = extractValue('color')(thing.value);
           const afShape = findShapeByName(shape);
+          const fNumber = textNumbers[number] || parseInt(number, 10);
 
-          const newItems = createAframeElements(n, color, afShape, lastPos, autoid);
+          const newItems = createAframeElements(fNumber, color, afShape, lastPos, autoid);
           setAutoid((id) => id + newItems.length);
           setScene((items) => [...items, ...newItems]);
           setLastPos(([x, y, z]) => [x, y + newItems.length, z]);
-          printCommand(iptValue, 'Done.');
-          iptEl.value = '';
-          break;
-        }
-        case 'move': {
-          const { things, where, error } = understandMove(args, scene);
-          if (error) {
-            printCommand(iptValue, error);
-            iptEl.value = '';
-            return;
-          }
-          setScene((elements) => elements.map((el) => (things.includes(el) ? { ...el, position: [...alterByIndex(inc, 2, el.position)] } : el)));
-          printCommand(iptValue, 'Done.');
+          printCommand(command, 'Done.');
           iptEl.value = '';
           break;
         }
         default:
-          printCommand(iptValue, `I don't understand the word "<span>${command}</span>" in this context`);
-          iptEl.value = '';
           break;
       }
-    }
-  };
- */
-      console.log(understandCommand(command));
-      const [err, {
-        understood: {
-          number, color, shape,
-        },
-      }] = understandCommand(command);
-
-      if (err) {
-        return displayError(command, err);
-      }
-
-      const afShape = findShapeByName(shape);
-      const fNumber = textNumbers[number] || parseInt(number, 10);
-
-      const newItems = createAframeElements(fNumber, color, afShape, lastPos, autoid);
-      setAutoid((id) => id + newItems.length);
-      setScene((items) => [...items, ...newItems]);
-      setLastPos(([x, y, z]) => [x, y + newItems.length, z]);
-      printCommand(command, 'Done.');
-      iptEl.value = '';
     }
   };
   const focusInput = (e) => {
